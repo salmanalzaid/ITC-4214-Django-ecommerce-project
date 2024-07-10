@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br>
+
+<div class="container">
+    <br><br>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="Product Image">
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <!-- Additional product details can go here -->
+
+                    {% if product.is_sale %}
+                    <div class="d-flex justify-content-center small text-warning mb-2">
+                        <div class="bi-star-fill"></div>
+                        <span> Sale </span>
+                        <div class="bi-star-fill"></div>
+                    </div>
+                    <p><strike>€{{ product.price }}</strike></p>
+                    <p>€{{ product.sale_price }}</p>
+                    {% else %}
+                    <p>€{{ product.price }}</p>
+                    {% endif %}
+
+                    <a href="#" class="btn btn-primary">Make something here</a>
+                    <button type="button" value="{{ product.id }}" class="btn btn-secondary" id="addtocart">Add To Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('click', '#addtocart', function(e){
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'cart_add' %}',
+            data: {
+                product_id: $('#addtocart').val(), 
+                csrfmiddlewaretoken: '{{ csrf_token }}', 
+                action: 'post'
+            },
+            success: function(json){
+                document.getElementById("cart_quantity").textContent = json.qty;
+            },
+            error: function(xhr, errmsg, err){
+                console.error(errmsg);
+            }
+        });
+    });
+</script>
+
+{% endblock %}

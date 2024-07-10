@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect
-from .models import Product
+from .models import Product, Category
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from .forms import SignUpForm
+from django import forms
 # Create your views here.
 
 def home(request):
@@ -10,6 +14,19 @@ def home(request):
 
 def about(request):
     return render(request, 'about.html', {})
+
+def category(request, look):
+    look=  look.replace('-', ' ')
+    
+    try:
+        category = Category.objects.get(name=look)
+        products = Product.objects.filter(category=category)
+        return render(request, 'category.html', {'products': products,'category':category})
+    except:
+        messages.success(request, ("The category doesn't exist"))
+
+        return redirect('home')
+        
 
 def login_user(request):
     
@@ -34,3 +51,30 @@ def logout_user(request):
     logout(request)
     messages.success(request, ("you successfully loged out !"))
     return redirect('home')
+
+
+def register_user(request):
+    
+    form = SignUpForm()
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            messages.success(request, ("You are part of the family now, Welcome to the JerseyHeritage !"))
+            return redirect('home')
+        
+        else:
+            messages.success(request, ("OOPS!! something went wrong, try again :)"))
+            return redirect('register')
+
+                
+    return render(request, 'register.html', {'form':form} )
+
+def product(request, pk):
+    product = Product.objects.get(id=pk)
+    return render(request, 'product.html', {'product':product})
