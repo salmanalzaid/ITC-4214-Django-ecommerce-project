@@ -130,7 +130,7 @@ def search(request):
 	if request.method == "POST":
      
 		searched = request.POST['searched']
-		#searched = Product.objects.filter(Q(name__icontains=searched) | Q(description__icontains=searched))
+		searched = Product.objects.filter(name__icontains=searched)
   
 		if not searched:
 			messages.success(request, "That Product Does Not Exist...Please try Again.")
